@@ -1,0 +1,268 @@
+╔══════════════════════════════════════════════════════════════╗
+║       BUILDTRACK FRONTEND - INDIVIDUAL FILES INDEX           ║
+║                  29 Files Ready to Download                  ║
+╚══════════════════════════════════════════════════════════════╝
+
+📍 Location: /app/DOWNLOADS-INDIVIDUAL/
+
+═══════════════════════════════════════════════════════════════
+  📥 DOWNLOAD THESE FILES (IN ORDER)
+═══════════════════════════════════════════════════════════════
+
+✅ SETUP GUIDE (Read First!)
+├─ 00-SETUP-GUIDE.md (8.3K)
+   └─ Complete instructions on how to organize all files
+
+═══════════════════════════════════════════════════════════════
+  📦 CONFIGURATION FILES (01-05)
+═══════════════════════════════════════════════════════════════
+
+01. 01-package.json (2.0K)
+    └─ Save as: package.json
+    └─ Contains: All dependencies and scripts
+
+02. 02-env-example.txt (44 bytes)
+    └─ Save as: .env
+    └─ Contains: Backend URL configuration
+
+03. 03-tailwind.config.js (2.0K)
+    └─ Save as: tailwind.config.js
+    └─ Contains: Tailwind CSS configuration
+
+04. 04-postcss.config.js (82 bytes)
+    └─ Save as: postcss.config.js
+    └─ Contains: PostCSS configuration
+
+05. 05-craco.config.js (150 bytes)
+    └─ Save as: craco.config.js
+    └─ Contains: Create React App override
+
+═══════════════════════════════════════════════════════════════
+  🎯 MAIN APPLICATION FILES (06-09)
+═══════════════════════════════════════════════════════════════
+
+06. 06-App.js (2.7K)
+    └─ Save as: src/App.js
+    └─ Contains: Main app with routing
+
+07. 07-App.css (654 bytes)
+    └─ Save as: src/App.css
+    └─ Contains: Custom application styles
+
+08. 08-index.css (1.7K)
+    └─ Save as: src/index.css
+    └─ Contains: Global styles + Tailwind
+
+09. 09-index.js (255 bytes)
+    └─ Save as: src/index.js
+    └─ Contains: React entry point
+
+═══════════════════════════════════════════════════════════════
+  📄 MAIN PAGES (10-13)
+═══════════════════════════════════════════════════════════════
+
+10. 10-Login.js (8.2K)
+    └─ Save as: src/pages/Login.js
+    └─ Contains: Login & Registration page
+
+11. 11-AdminDashboard.js (1.1K)
+    └─ Save as: src/pages/AdminDashboard.js
+    └─ Contains: Admin routing
+
+12. 12-EngineerDashboard.js (971 bytes)
+    └─ Save as: src/pages/EngineerDashboard.js
+    └─ Contains: Engineer routing
+
+13. 13-ClientDashboard.js (691 bytes)
+    └─ Save as: src/pages/ClientDashboard.js
+    └─ Contains: Client routing
+
+═══════════════════════════════════════════════════════════════
+  🧩 COMPONENTS (14-16)
+═══════════════════════════════════════════════════════════════
+
+14. 14-DashboardLayout.js (4.9K)
+    └─ Save as: src/components/DashboardLayout.js
+    └─ Contains: Sidebar layout
+
+15. 15-NotificationBell.js (3.8K)
+    └─ Save as: src/components/NotificationBell.js
+    └─ Contains: Notification system
+
+16. 16-api.js (670 bytes)
+    └─ Save as: src/utils/api.js
+    └─ Contains: Axios configuration
+
+═══════════════════════════════════════════════════════════════
+  👨‍💼 ADMIN PAGES (20-25)
+═══════════════════════════════════════════════════════════════
+
+17. 20-AdminHome.js (6.9K)
+    └─ Save as: src/pages/admin/AdminHome.js
+    └─ Contains: Admin dashboard with stats
+
+18. 20-AdminProjects.js (13K)
+    └─ Save as: src/pages/admin/AdminProjects.js
+    └─ Contains: Project management
+
+19. 20-AdminTeams.js (7.5K)
+    └─ Save as: src/pages/admin/AdminTeams.js
+    └─ Contains: Team management
+
+20. 20-AdminDrawings.js (7.6K)
+    └─ Save as: src/pages/admin/AdminDrawings.js
+    └─ Contains: Drawing approvals
+
+21. 20-AdminMaterials.js (6.9K)
+    └─ Save as: src/pages/admin/AdminMaterials.js
+    └─ Contains: Material approvals
+
+22. 20-AdminSchedules.js (9.1K)
+    └─ Save as: src/pages/admin/AdminSchedules.js
+    └─ Contains: Schedule management
+
+═══════════════════════════════════════════════════════════════
+  👷 ENGINEER PAGES (30-33)
+═══════════════════════════════════════════════════════════════
+
+23. 30-EngineerHome.js (4.5K)
+    └─ Save as: src/pages/engineer/EngineerHome.js
+    └─ Contains: Engineer dashboard
+
+24. 30-EngineerProjects.js (6.3K)
+    └─ Save as: src/pages/engineer/EngineerProjects.js
+    └─ Contains: Project updates
+
+25. 30-EngineerDrawings.js (8.5K)
+    └─ Save as: src/pages/engineer/EngineerDrawings.js
+    └─ Contains: Drawing uploads
+
+26. 30-EngineerMaterials.js (8.1K)
+    └─ Save as: src/pages/engineer/EngineerMaterials.js
+    └─ Contains: Material requests
+
+═══════════════════════════════════════════════════════════════
+  👔 CLIENT PAGES (40-41)
+═══════════════════════════════════════════════════════════════
+
+27. 40-ClientHome.js (4.0K)
+    └─ Save as: src/pages/client/ClientHome.js
+    └─ Contains: Client dashboard
+
+28. 40-ClientProjects.js (9.1K)
+    └─ Save as: src/pages/client/ClientProjects.js
+    └─ Contains: Project viewing
+
+═══════════════════════════════════════════════════════════════
+  📁 FOLDER STRUCTURE TO CREATE
+═══════════════════════════════════════════════════════════════
+
+buildtrack-frontend/
+├── package.json              ← 01-package.json
+├── .env                      ← 02-env-example.txt
+├── tailwind.config.js        ← 03-tailwind.config.js
+├── postcss.config.js         ← 04-postcss.config.js
+├── craco.config.js           ← 05-craco.config.js
+├── public/
+│   └── index.html           ← Create manually (see guide)
+└── src/
+    ├── App.js               ← 06-App.js
+    ├── App.css              ← 07-App.css
+    ├── index.css            ← 08-index.css
+    ├── index.js             ← 09-index.js
+    ├── pages/
+    │   ├── Login.js         ← 10-Login.js
+    │   ├── AdminDashboard.js     ← 11
+    │   ├── EngineerDashboard.js  ← 12
+    │   ├── ClientDashboard.js    ← 13
+    │   ├── admin/
+    │   │   ├── AdminHome.js          ← 20-AdminHome.js
+    │   │   ├── AdminProjects.js      ← 20-AdminProjects.js
+    │   │   ├── AdminTeams.js         ← 20-AdminTeams.js
+    │   │   ├── AdminDrawings.js      ← 20-AdminDrawings.js
+    │   │   ├── AdminMaterials.js     ← 20-AdminMaterials.js
+    │   │   └── AdminSchedules.js     ← 20-AdminSchedules.js
+    │   ├── engineer/
+    │   │   ├── EngineerHome.js       ← 30-EngineerHome.js
+    │   │   ├── EngineerProjects.js   ← 30-EngineerProjects.js
+    │   │   ├── EngineerDrawings.js   ← 30-EngineerDrawings.js
+    │   │   └── EngineerMaterials.js  ← 30-EngineerMaterials.js
+    │   └── client/
+    │       ├── ClientHome.js         ← 40-ClientHome.js
+    │       └── ClientProjects.js     ← 40-ClientProjects.js
+    ├── components/
+    │   ├── DashboardLayout.js  ← 14-DashboardLayout.js
+    │   ├── NotificationBell.js ← 15-NotificationBell.js
+    │   └── ui/                 ← Need to add Shadcn components
+    └── utils/
+        └── api.js              ← 16-api.js
+
+═══════════════════════════════════════════════════════════════
+  🚀 QUICK START AFTER DOWNLOAD
+═══════════════════════════════════════════════════════════════
+
+1. Read Setup Guide First
+   └─ Open: 00-SETUP-GUIDE.md
+
+2. Create Folders
+   └─ mkdir -p buildtrack-frontend/src/{pages/{admin,engineer,client},components,utils,public}
+
+3. Download & Place Files
+   └─ Follow the naming guide above
+
+4. Install Dependencies
+   └─ cd buildtrack-frontend
+   └─ yarn install
+
+5. Configure Backend
+   └─ Edit .env file with your backend URL
+
+6. Start Application
+   └─ yarn start
+
+7. Opens at http://localhost:3000
+
+═══════════════════════════════════════════════════════════════
+  ⚠️ STILL NEEDED
+═══════════════════════════════════════════════════════════════
+
+□ UI Components (40+ files from Shadcn/UI)
+  └─ Place in: src/components/ui/
+  └─ Get from: https://ui.shadcn.com
+
+□ public/index.html
+  └─ Template in 00-SETUP-GUIDE.md
+
+□ Backend URL Configuration
+  └─ Update in .env file
+
+═══════════════════════════════════════════════════════════════
+  💡 TIPS
+═══════════════════════════════════════════════════════════════
+
+• Download in order (00, 01, 02, ...)
+• Keep the numbered prefix until organized
+• Use the organize.sh script from setup guide
+• All files are plain text (JS, CSS, JSON)
+• Total size: ~120 KB (very small!)
+
+═══════════════════════════════════════════════════════════════
+  📞 HELP
+═══════════════════════════════════════════════════════════════
+
+Setup Issues?
+└─ Check: 00-SETUP-GUIDE.md
+
+Missing UI Components?
+└─ Let me know, I can create them individually
+
+Need Backend?
+└─ Available in full project download
+
+═══════════════════════════════════════════════════════════════
+
+✅ All 29 files ready at: /app/DOWNLOADS-INDIVIDUAL/
+
+Download them one by one from your Emergent file browser!
+
+═══════════════════════════════════════════════════════════════

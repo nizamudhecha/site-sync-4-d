@@ -1,0 +1,203 @@
+╔══════════════════════════════════════════════════════════════╗
+║                 BUILDTRACK - QUICK COMMANDS                  ║
+║          Civil Engineering Project Management System         ║
+╚══════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════
+  STEP 1: EXTRACT PROJECT
+═══════════════════════════════════════════════════════════════
+
+  cd ~/Downloads
+  tar -xzf DOWNLOAD-buildtrack-final-package.tar.gz
+  ./extract-and-setup.sh
+  cd buildtrack-project
+
+═══════════════════════════════════════════════════════════════
+  STEP 2: START MONGODB
+═══════════════════════════════════════════════════════════════
+
+  Mac:
+  ├─ brew services start mongodb-community
+  
+  Linux:
+  ├─ sudo systemctl start mongodb
+  
+  Windows:
+  └─ Start MongoDB service from Services panel
+
+  Verify:
+  └─ mongosh
+
+═══════════════════════════════════════════════════════════════
+  STEP 3: START BACKEND (Terminal 1)
+═══════════════════════════════════════════════════════════════
+
+  cd backend
+  pip install -r requirements.txt
+  uvicorn server:app --reload --port 8001
+
+  Expected Output:
+  ├─ INFO: Uvicorn running on http://0.0.0.0:8001
+  └─ INFO: Application startup complete.
+
+  ✓ Backend running at: http://localhost:8001
+
+═══════════════════════════════════════════════════════════════
+  STEP 4: START FRONTEND (Terminal 2)
+═══════════════════════════════════════════════════════════════
+
+  cd frontend
+  yarn install
+  yarn start
+
+  Expected Output:
+  ├─ Compiled successfully!
+  ├─ Local: http://localhost:3000
+  └─ Browser opens automatically
+
+  ✓ Frontend running at: http://localhost:3000
+
+═══════════════════════════════════════════════════════════════
+  STEP 5: CREATE YOUR ACCOUNT
+═══════════════════════════════════════════════════════════════
+
+  1. Open: http://localhost:3000
+  2. Click: "Don't have an account? Register"
+  3. Fill in:
+     ├─ Name: Your Name
+     ├─ Email: admin@example.com
+     ├─ Password: YourPassword123
+     ├─ Role: Admin
+     └─ Employee ID: ADM-001
+  4. Click: "Create Account"
+  
+  ✓ You're logged in as Admin!
+
+═══════════════════════════════════════════════════════════════
+  QUICK TEST WORKFLOW
+═══════════════════════════════════════════════════════════════
+
+  As Admin:
+  ├─ 1. Create Project
+  │   └─ Projects → Create Project → Fill details → Submit
+  │
+  ├─ 2. Create Engineer Account
+  │   └─ Logout → Register with Role: Engineer
+  │
+  ├─ 3. Assign Engineer
+  │   └─ Login as Admin → Projects → Manage Engineers
+  │
+  └─ 4. Create Schedule
+      └─ Schedules → Add Schedule → Fill dates → Submit
+
+  As Engineer:
+  ├─ 1. Upload Drawing
+  │   └─ Drawings → Upload Drawing → Select file → Submit
+  │
+  ├─ 2. Request Material
+  │   └─ Materials → Request Material → Fill details
+  │
+  └─ 3. Update Progress
+      └─ My Projects → Update Progress → Set % → Submit
+
+  As Client:
+  └─ View Projects (Read-only)
+      └─ Projects → View details, drawings, schedules
+
+═══════════════════════════════════════════════════════════════
+  STOP COMMANDS
+═══════════════════════════════════════════════════════════════
+
+  Stop Frontend:
+  └─ Ctrl+C (in frontend terminal)
+
+  Stop Backend:
+  └─ Ctrl+C (in backend terminal)
+
+  Stop MongoDB:
+  ├─ Mac: brew services stop mongodb-community
+  └─ Linux: sudo systemctl stop mongodb
+
+═══════════════════════════════════════════════════════════════
+  TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════
+
+  ✗ MongoDB connection failed?
+  └─ sudo systemctl start mongodb
+
+  ✗ Port already in use?
+  └─ lsof -ti:3000 | xargs kill -9
+
+  ✗ Module not found?
+  └─ pip install -r requirements.txt --force-reinstall
+
+  ✗ Blank page?
+  └─ Check browser console (F12) + verify backend is running
+
+  ✗ CORS error?
+  └─ Check backend/.env has CORS_ORIGINS="*"
+
+═══════════════════════════════════════════════════════════════
+  USEFUL URLS
+═══════════════════════════════════════════════════════════════
+
+  Frontend:     http://localhost:3000
+  Backend API:  http://localhost:8001
+  API Docs:     http://localhost:8001/docs
+  MongoDB:      mongodb://localhost:27017
+
+═══════════════════════════════════════════════════════════════
+  CONFIGURATION FILES
+═══════════════════════════════════════════════════════════════
+
+  backend/.env:
+  ├─ MONGO_URL="mongodb://localhost:27017"
+  ├─ DB_NAME="buildtrack_database"
+  ├─ JWT_SECRET="your-secret-key"
+  └─ RESEND_API_KEY="re_xxx" (optional)
+
+  frontend/.env:
+  └─ REACT_APP_BACKEND_URL=http://localhost:8001
+
+═══════════════════════════════════════════════════════════════
+  DEFAULT TEST ACCOUNTS
+═══════════════════════════════════════════════════════════════
+
+  Admin:
+  ├─ Email: admin@buildtrack.com
+  └─ Password: admin123
+
+  Engineer:
+  ├─ Email: engineer@buildtrack.com
+  └─ Password: engineer123
+
+  Client:
+  ├─ Email: client@buildtrack.com
+  └─ Password: client123
+
+═══════════════════════════════════════════════════════════════
+  ONE-LINE COMMANDS (Copy & Paste)
+═══════════════════════════════════════════════════════════════
+
+  Full Setup:
+  └─ cd backend && pip install -r requirements.txt && 
+     uvicorn server:app --reload --port 8001
+
+  Frontend Setup:
+  └─ cd frontend && yarn install && yarn start
+
+  Database Check:
+  └─ mongosh
+
+  Quick Test:
+  └─ curl http://localhost:8001/api/
+
+═══════════════════════════════════════════════════════════════
+
+  📚 Full Documentation: PROJECT_DOCUMENTATION.md
+  📖 Complete Guide: QUICK_START_GUIDE.md
+  🎨 Design Specs: design_guidelines.json
+
+  Need help? Check QUICK_START_GUIDE.md for detailed solutions!
+
+═══════════════════════════════════════════════════════════════

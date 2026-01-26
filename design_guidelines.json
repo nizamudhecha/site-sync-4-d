@@ -1,0 +1,167 @@
+{
+  "design_system": {
+    "identity": {
+      "name": "Structural Integrity",
+      "archetype": "The Performance Pro",
+      "core_metaphor": "The Digital Site Office - Organized, Sturdy, Precise",
+      "emotional_tone": "Reliable, Industrial, High-Precision, Trustworthy"
+    },
+    "typography": {
+      "font_family": {
+        "headings": "Barlow Condensed, sans-serif",
+        "body": "Inter, sans-serif",
+        "mono": "JetBrains Mono, monospace"
+      },
+      "scale": {
+        "h1": "text-5xl font-bold tracking-tight uppercase",
+        "h2": "text-3xl font-semibold tracking-tight uppercase",
+        "h3": "text-xl font-semibold tracking-normal",
+        "body": "text-base font-normal leading-relaxed",
+        "caption": "text-xs font-medium tracking-wider uppercase text-muted-foreground"
+      },
+      "imports": [
+        "@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');"
+      ]
+    },
+    "colors": {
+      "palette": {
+        "primary": {
+          "name": "Steel Beam",
+          "hex": "#0F172A",
+          "tailwind": "slate-900",
+          "usage": "Sidebars, Primary Buttons, Headings"
+        },
+        "secondary": {
+          "name": "Safety Orange",
+          "hex": "#EA580C",
+          "tailwind": "orange-600",
+          "usage": "Call to Actions, Alerts, Highlights, Progress Bars"
+        },
+        "background": {
+          "name": "Concrete Mist",
+          "hex": "#F8FAFC",
+          "tailwind": "slate-50",
+          "usage": "App Background, Dashboard Canvas"
+        },
+        "surface": {
+          "name": "Blueprint White",
+          "hex": "#FFFFFF",
+          "tailwind": "white",
+          "usage": "Cards, Modals, Input Fields"
+        },
+        "accent": {
+          "name": "Technical Blue",
+          "hex": "#0EA5E9",
+          "tailwind": "sky-500",
+          "usage": "Links, Selection States, Info Icons"
+        }
+      },
+      "gradients": {
+        "forbidden": true,
+        "exception": "Subtle vertical gradient on sidebar only (Slate-900 to Slate-950)"
+      }
+    },
+    "layout": {
+      "grid_system": "Bento Grid (Dense)",
+      "spacing": "Generous (2x standard)",
+      "border_radius": {
+        "default": "rounded-sm",
+        "buttons": "rounded-sm",
+        "cards": "rounded-md",
+        "inputs": "rounded-none"
+      },
+      "shadows": {
+        "card": "shadow-[0_1px_3px_0_rgba(0,0,0,0.1),_0_1px_2px_-1px_rgba(0,0,0,0.1)]",
+        "hover": "shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),_0_2px_4px_-2px_rgba(0,0,0,0.1)]",
+        "technical": "shadow-[4px_4px_0px_0px_rgba(15,23,42,0.1)]"
+      }
+    },
+    "components": {
+      "buttons": {
+        "style": "Sharp edges or minimal radius (2px). High contrast.",
+        "primary": "bg-slate-900 text-white hover:bg-slate-800 hover:shadow-md transition-all active:translate-y-0.5",
+        "secondary": "bg-white border-2 border-slate-200 text-slate-900 hover:border-slate-900 hover:bg-slate-50"
+      },
+      "cards": {
+        "style": "Flat white surface, subtle border, 'Technical' shadow on hover.",
+        "classes": "bg-white border border-slate-200 rounded-md p-6 hover:border-slate-300 transition-colors"
+      },
+      "inputs": {
+        "style": "Rectangular, distinct borders, no soft glows.",
+        "classes": "rounded-sm border-slate-300 focus:ring-2 focus:ring-slate-900 focus:border-transparent bg-slate-50"
+      },
+      "navigation": {
+        "sidebar": "bg-slate-900 text-slate-300 w-64 fixed h-full border-r border-slate-800",
+        "active_item": "bg-slate-800 text-white border-l-4 border-orange-600"
+      }
+    },
+    "visual_enhancers": {
+      "textures": "Subtle grid pattern (graph paper) on dashboard background.",
+      "icons": "Phosphor Icons (Regular weight) or Lucide (Stroke 1.5px).",
+      "micro_interactions": "Buttons press down (scale-95). Cards lift up (-translate-y-1)."
+    },
+    "accessibility": {
+      "contrast": "WCAG AA Compliant. Dark text on light backgrounds.",
+      "focus_states": "Visible 2px offset ring in Safety Orange or Steel Blue.",
+      "reduced_motion": "Respect user settings."
+    }
+  },
+  "assets": {
+    "images": {
+      "hero_background": {
+        "url": "https://images.unsplash.com/photo-1685233503586-0cb11f46e99f",
+        "alt": "Aerial view of construction site",
+        "usage": "Login page background, Landing page hero"
+      },
+      "project_thumbnails": [
+        {
+          "url": "https://images.unsplash.com/photo-1557226217-afa89ef30f64",
+          "alt": "Steel structure building",
+          "usage": "Project card thumbnail"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1543829285-a3b7157052a7",
+          "alt": "Glass facade detail",
+          "usage": "Project card thumbnail"
+        }
+      ],
+      "team_avatars": [
+        {
+          "url": "https://images.pexels.com/photos/3862384/pexels-photo-3862384.jpeg",
+          "alt": "Civil Engineer with blueprints",
+          "usage": "Engineer profile, Team section"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1768158988512-ad31657fe5b8",
+          "alt": "Safety helmet on site",
+          "usage": "Safety/Compliance section"
+        }
+      ]
+    },
+    "icons": {
+      "library": "lucide-react",
+      "style": "Stroke width 1.5px, sharp joins if possible"
+    }
+  },
+  "implementation_guide": {
+    "file_structure": {
+      "pages": "/app/frontend/src/pages",
+      "components": "/app/frontend/src/components",
+      "layouts": "/app/frontend/src/layouts"
+    },
+    "steps": [
+      "1. Install fonts (Barlow Condensed) in index.css",
+      "2. Configure Tailwind colors (slate-900 as primary, orange-600 as secondary)",
+      "3. Create 'DashboardLayout' with the fixed sidebar",
+      "4. Build 'ProjectCard' component with the technical shadow style",
+      "5. Implement 'GanttChart' using a library or custom grid",
+      "6. Ensure all inputs have data-testid attributes"
+    ],
+    "universal_rules": [
+      "Do NOT use gradients for backgrounds.",
+      "Do NOT use rounded-full for buttons (use rounded-sm).",
+      "Always use 'Barlow Condensed' for H1-H3.",
+      "Use 'Safety Orange' sparingly for high-priority actions only."
+    ]
+  }
+}
