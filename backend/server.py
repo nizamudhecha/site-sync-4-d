@@ -130,22 +130,40 @@ class DrawingResponse(BaseModel):
     status: str
     admin_comments: Optional[str] = None
     upload_date: str
-
 class ScheduleCreate(BaseModel):
     project_id: str
     phase_name: str
     start_date: str
-    end_date: str
+    duration: int
     description: Optional[str] = None
+
 
 class Schedule(BaseModel):
     schedule_id: str
     project_id: str
     phase_name: str
     start_date: str
+
+    duration: Optional[int] = None   # ✅ FIX
+
     end_date: str
     description: Optional[str] = None
+    progress: float = 0.0
+    status: str = "Not Started"
     created_at: str
+
+class HolidayCreate(BaseModel):
+    name: str
+    date: str
+
+
+class Holiday(BaseModel):
+    holiday_id: str
+    name: str
+    date: str
+    created_at: str
+
+
 
 class Notification(BaseModel):
     notification_id: str
@@ -312,7 +330,6 @@ async def create_project(
     project: ProjectCreate,
     payload: dict = Depends(require_role(["Admin"]))
 ):
-    # ✅ Find client by email
     client_user = await db.users.find_one({"email": project.client_email})
 
     if not client_user:
@@ -334,36 +351,38 @@ async def create_project(
         "assigned_engineers": [],
         "progress": 0.0,
         "created_at": datetime.now(timezone.utc).isoformat(),
+
+        # ✅ IMPORTANT: Owner Admin ID
+        "created_by_admin": payload["user_id"]
     }
 
     await db.projects.insert_one(project_data)
 
-    # ✅ Correct Return
     return Project(**project_data)
 
 
 # ============================
 # ✅ GET PROJECTS
 # ============================
-
 @api_router.get("/projects", response_model=List[Project])
 async def get_projects(payload: dict = Depends(verify_token)):
 
     role = payload["role"]
     user_id = payload["user_id"]
 
-    # ✅ Admin gets all
+    # ✅ Admin gets ONLY self-created projects
     if role == "Admin":
-        projects = await db.projects.find({}, {"_id": 0}).to_list(1000)
+        projects = await db.projects.find(
+            {"created_by_admin": user_id},
+            {"_id": 0}
+        ).to_list(1000)
 
-    # ✅ Engineer gets assigned only
     elif role == "Engineer":
         projects = await db.projects.find(
             {"assigned_engineers": user_id},
             {"_id": 0}
         ).to_list(1000)
 
-    # ✅ Client gets projects using EMAIL
     else:
         client_user = await db.users.find_one({"user_id": user_id})
 
@@ -378,6 +397,7 @@ async def get_projects(payload: dict = Depends(verify_token)):
     return projects
 
 
+
 # ============================
 # ✅ GET SINGLE PROJECT
 # ============================
@@ -385,10 +405,18 @@ async def get_projects(payload: dict = Depends(verify_token)):
 @api_router.get("/projects/{project_id}", response_model=Project)
 async def get_project(project_id: str, payload: dict = Depends(verify_token)):
 
-    project = await db.projects.find_one({"project_id": project_id}, {"_id": 0})
+    project = await db.projects.find_one(
+        {"project_id": project_id},
+        {"_id": 0}
+    )
 
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
+
+    # ✅ Admin access restriction
+    if payload["role"] == "Admin":
+        if project["created_by_admin"] != payload["user_id"]:
+            raise HTTPException(status_code=403, detail="Not allowed")
 
     return Project(**project)
 
@@ -538,30 +566,64 @@ async def upload_drawing(
     return {"message": "Drawing uploaded successfully", "drawing_id": drawing["drawing_id"]}
 
 @api_router.get("/drawings", response_model=List[DrawingResponse])
-async def get_drawings(project_id: Optional[str] = None, payload: dict = Depends(verify_token)):
+async def get_drawings(
+    project_id: Optional[str] = None,
+    payload: dict = Depends(verify_token)
+):
     query = {}
+
+    # ✅ Project Filter
     if project_id:
         query["project_id"] = project_id
+
+    # ✅ Engineer can ONLY see own drawings
     if payload["role"] == "Engineer":
         query["engineer_id"] = payload["user_id"]
-    
-    drawings = await db.drawings.find(query, {"_id": 0, "file_id": 0}).to_list(1000)
+
+    # ✅ Client can ONLY see project drawings
+    if payload["role"] == "Client":
+        query["status"] = "Approved"
+
+    drawings = await db.drawings.find(
+        query,
+        {"_id": 0, "file_id": 0}
+    ).to_list(1000)
+
     return drawings
 
+
+
 @api_router.get("/drawings/{drawing_id}/download")
-async def download_drawing(drawing_id: str, payload: dict = Depends(verify_token)):
+async def download_drawing(
+    drawing_id: str,
+    payload: dict = Depends(verify_token)
+):
     from fastapi.responses import StreamingResponse
-    
-    drawing = await db.drawings.find_one({"drawing_id": drawing_id}, {"_id": 0})
+
+    drawing = await db.drawings.find_one(
+        {"drawing_id": drawing_id},
+        {"_id": 0}
+    )
+
     if not drawing:
         raise HTTPException(status_code=404, detail="Drawing not found")
-    
+
+    # ✅ Engineer restriction
+    if payload["role"] == "Engineer":
+        if drawing["engineer_id"] != payload["user_id"]:
+            raise HTTPException(status_code=403, detail="Not Allowed")
+
+    # ✅ Client restriction
+    if payload["role"] == "Client":
+        if drawing["status"] != "Approved":
+            raise HTTPException(status_code=403, detail="Not Allowed")
+
     grid_out = await fs.open_download_stream(ObjectId(drawing["file_id"]))
     content = await grid_out.read()
-    
+
     return StreamingResponse(
         io.BytesIO(content),
-        media_type=grid_out.metadata.get("content_type", "application/octet-stream"),
+        media_type=grid_out.metadata.get("content_type"),
         headers={"Content-Disposition": f"attachment; filename={drawing['filename']}"}
     )
 
@@ -619,15 +681,37 @@ async def request_material(material: MaterialRequest, payload: dict = Depends(re
         )
     
     return Material(**material_data)
-
-@api_router.get("/materials", response_model=List[Material])
-async def get_materials(project_id: Optional[str] = None, payload: dict = Depends(verify_token)):
+@api_router.get("/materials")
+async def get_materials(
+    project_id: Optional[str] = None,   # ✅ Add this
+    payload: dict = Depends(verify_token)
+):
     query = {}
+
+    # ✅ Project filter (Admin Page Project Wise)
     if project_id:
         query["project_id"] = project_id
+
+    # ✅ Engineer only own materials
     if payload["role"] == "Engineer":
         query["engineer_id"] = payload["user_id"]
-    
+
+    # ✅ Admin only own created projects
+    if payload["role"] == "Admin":
+        myProjects = await db.projects.find(
+            {"created_by_admin": payload["user_id"]},
+            {"_id": 0}
+        ).to_list(100)
+
+        projectIds = [p["project_id"] for p in myProjects]
+
+        # ✅ Admin project restriction + filter merge
+        if project_id:
+            if project_id not in projectIds:
+                raise HTTPException(status_code=403, detail="Not allowed")
+        else:
+            query["project_id"] = {"$in": projectIds}
+
     materials = await db.materials.find(query, {"_id": 0}).to_list(1000)
     return materials
 
@@ -657,34 +741,281 @@ async def approve_material(material_id: str, action: ApprovalAction, payload: di
 # SCHEDULE ROUTES
 # ====================
 
-@api_router.post("/schedules", response_model=Schedule)
-async def create_schedule(schedule: ScheduleCreate, payload: dict = Depends(require_role(["Admin"]))):
-    schedule_data = {
-        "schedule_id": str(ObjectId()),
-        **schedule.model_dump(),
+# ====================
+# ✅ CLEAN HOLIDAY + SCHEDULE ROUTES
+# ====================
+
+# ✅ Auto Remove Expired Holidays
+async def cleanup_old_holidays():
+    today = datetime.now().strftime("%Y-%m-%d")
+    await db.holidays.delete_many({"date": {"$lt": today}})
+
+
+# ✅ Calculate End Date (Skip Sundays + Holidays)
+async def calculate_end_date(start_date: str, duration: int):
+    await cleanup_old_holidays()
+
+    holidays = await db.holidays.find({}, {"_id": 0}).to_list(500)
+    holiday_dates = [h["date"] for h in holidays]
+
+    current = datetime.fromisoformat(start_date)
+    count = 0
+
+    while count < duration:
+        current += timedelta(days=1)
+        formatted = current.strftime("%Y-%m-%d")
+
+        # ✅ Skip Sundays
+        if current.weekday() == 6:
+            continue
+
+        # ✅ Skip Holidays
+        if formatted in holiday_dates:
+            continue
+
+        count += 1
+
+    return current.strftime("%Y-%m-%d")
+
+
+# ✅ ADD HOLIDAY (Admin + Notify Engineers)
+@api_router.post("/holidays", response_model=Holiday)
+async def create_holiday(
+    holiday: HolidayCreate,
+    payload: dict = Depends(require_role(["Admin"]))
+):
+    holiday_data = {
+        "holiday_id": str(ObjectId()),
+        "name": holiday.name,
+        "date": holiday.date,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
+
+    await db.holidays.insert_one(holiday_data)
+
+    # ✅ Notify Engineers
+    engineers = await db.users.find({"role": "Engineer"}, {"_id": 0}).to_list(500)
+    for eng in engineers:
+        await create_notification(
+            eng["user_id"],
+            "holiday_added",
+            "New Holiday Added 📢",
+            f"Holiday declared on {holiday.date}. Scheduling will skip this date.",
+            holiday_data["holiday_id"]
+        )
+
+    return Holiday(**holiday_data)
+
+
+# ✅ GET HOLIDAYS
+@api_router.get("/holidays", response_model=List[Holiday])
+async def get_holidays(payload: dict = Depends(verify_token)):
+    await cleanup_old_holidays()
+    holidays = await db.holidays.find({}, {"_id": 0}).to_list(500)
+    return holidays
+
+
+# ✅ DELETE HOLIDAY
+@api_router.delete("/holidays/{holiday_id}")
+async def delete_holiday(
+    holiday_id: str,
+    payload: dict = Depends(require_role(["Admin"]))
+):
+    result = await db.holidays.delete_one({"holiday_id": holiday_id})
+
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Holiday not found")
+
+    return {"message": "Holiday removed ✅"}
+
+
+# ✅ CREATE SCHEDULE PHASE (Auto Chaining + Notify Engineers)
+@api_router.post("/schedules", response_model=Schedule)
+async def create_schedule(
+    schedule: ScheduleCreate,
+    payload: dict = Depends(require_role(["Admin"]))
+):
+    # ✅ Auto Chain Start Date
+    last_phase = await db.schedules.find(
+        {"project_id": schedule.project_id},
+        {"_id": 0}
+    ).sort("end_date", -1).to_list(1)
+
+    if last_phase:
+        schedule.start_date = last_phase[0]["end_date"]
+
+    # ✅ Calculate End Date
+    end_date = await calculate_end_date(schedule.start_date, schedule.duration)
+
+    schedule_data = {
+        "schedule_id": str(ObjectId()),
+        "project_id": schedule.project_id,
+        "phase_name": schedule.phase_name,
+        "start_date": schedule.start_date,
+        "duration": schedule.duration,
+        "end_date": end_date,
+        "description": schedule.description,
+
+        "progress": 0.0,
+        "status": "Not Started",
+
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+
     await db.schedules.insert_one(schedule_data)
-    
-    # Notify assigned engineers
-    project = await db.projects.find_one({"project_id": schedule.project_id}, {"_id": 0})
-    if project:
-        for engineer_id in project.get("assigned_engineers", []):
-            await create_notification(
-                engineer_id,
-                "schedule_update",
-                "New Schedule Added",
-                f"New phase '{schedule.phase_name}' added to {project['name']}",
-                schedule_data["schedule_id"]
-            )
-    
+
+    # ✅ Notify Engineers
+    engineers = await db.users.find({"role": "Engineer"}, {"_id": 0}).to_list(500)
+    for eng in engineers:
+        await create_notification(
+            eng["user_id"],
+            "schedule_added",
+            "New Phase Scheduled ✅",
+            f"Phase '{schedule.phase_name}' added. Timeline updated.",
+            schedule_data["schedule_id"]
+        )
+
     return Schedule(**schedule_data)
 
-@api_router.get("/schedules", response_model=List[Schedule])
-async def get_schedules(project_id: Optional[str] = None, payload: dict = Depends(verify_token)):
-    query = {"project_id": project_id} if project_id else {}
-    schedules = await db.schedules.find(query, {"_id": 0}).to_list(1000)
+
+# ✅ GET PROJECT SCHEDULES
+@api_router.get("/projects/{project_id}/schedules", response_model=List[Schedule])
+async def get_project_schedules(
+    project_id: str,
+    payload: dict = Depends(verify_token)
+):
+    schedules = await db.schedules.find(
+        {"project_id": project_id},
+        {"_id": 0}
+    ).sort("start_date", 1).to_list(1000)
+
     return schedules
+
+
+# ✅ UPDATE PROGRESS (Engineer)
+@api_router.put("/schedules/{schedule_id}/progress")
+async def update_schedule_progress(
+    schedule_id: str,
+    progress: float,
+    payload: dict = Depends(require_role(["Engineer"]))
+):
+    schedule = await db.schedules.find_one({"schedule_id": schedule_id})
+
+    if not schedule:
+        raise HTTPException(status_code=404, detail="Schedule not found")
+
+    # ✅ Update phase progress + status
+    status = "Ongoing"
+    if progress == 0:
+        status = "Not Started"
+    elif progress >= 100:
+        status = "Completed"
+
+    await db.schedules.update_one(
+        {"schedule_id": schedule_id},
+        {"$set": {"progress": progress, "status": status}}
+    )
+
+    # ✅ AUTO UPDATE PROJECT PROGRESS (Average)
+    project_id = schedule["project_id"]
+
+    phases = await db.schedules.find(
+        {"project_id": project_id},
+        {"_id": 0}
+    ).to_list(100)
+
+    if phases:
+        avg_progress = sum([p.get("progress", 0) for p in phases]) / len(phases)
+
+        await db.projects.update_one(
+            {"project_id": project_id},
+            {"$set": {"progress": round(avg_progress, 2)}}
+        )
+
+    return {"message": "Progress Updated ✅"}
+
+
+@api_router.delete("/projects/{project_id}")
+async def delete_project(
+    project_id: str,
+    payload: dict = Depends(require_role(["Admin"]))
+):
+    project = await db.projects.find_one({"project_id": project_id})
+
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    # ✅ Only owner admin can delete
+    if project["created_by_admin"] != payload["user_id"]:
+        raise HTTPException(status_code=403, detail="Not allowed")
+
+    await db.projects.delete_one({"project_id": project_id})
+
+    # ✅ Also delete schedules & materials etc (optional)
+    await db.schedules.delete_many({"project_id": project_id})
+    await db.materials.delete_many({"project_id": project_id})
+    await db.drawings.delete_many({"project_id": project_id})
+
+    return {"message": "Project deleted successfully ✅"}
+
+
+
+
+    # ============================
+    # ✅ NOTIFY ASSIGNED ENGINEERS
+    # ============================
+
+    for engineer_id in project.get("assigned_engineers", []):
+
+        await create_notification(
+            engineer_id,
+            "schedule_update",
+            "New Schedule Phase Added",
+            f"Phase '{schedule.phase_name}' was added in project '{project['name']}'",
+            schedule_data["schedule_id"]
+        )
+
+    # ============================
+    # ✅ NOTIFY CLIENT ALSO
+    # ============================
+
+    client_user = await db.users.find_one(
+        {"email": project["client_email"]},
+        {"_id": 0}
+    )
+
+    if client_user:
+        await create_notification(
+            client_user["user_id"],
+            "schedule_update",
+            "Project Schedule Updated",
+            f"A new schedule phase '{schedule.phase_name}' was added in your project '{project['name']}'",
+            schedule_data["schedule_id"]
+        )
+
+    return Schedule(**schedule_data)
+
+
+@api_router.get("/projects/{project_id}/schedules", response_model=List[Schedule])
+async def get_project_schedules(
+    project_id: str,
+    payload: dict = Depends(verify_token)
+):
+    # ✅ Admin can access only own project schedule
+    if payload["role"] == "Admin":
+        project = await db.projects.find_one(
+            {"project_id": project_id, "created_by_admin": payload["user_id"]}
+        )
+        if not project:
+            raise HTTPException(status_code=403, detail="Not allowed")
+
+    schedules = await db.schedules.find(
+        {"project_id": project_id},
+        {"_id": 0}
+    ).to_list(1000)
+
+    return schedules
+
 
 @api_router.put("/schedules/{schedule_id}")
 async def update_schedule(schedule_id: str, updates: dict, payload: dict = Depends(require_role(["Admin"]))):

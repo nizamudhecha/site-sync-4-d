@@ -177,7 +177,7 @@ const Login = ({ onLogin }) => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Admin">Admin</SelectItem>
-                    <SelectItem value="Engineer">Engineer</SelectItem>
+                    <SelectItem value="Engineer">Staff</SelectItem>
                     <SelectItem value="Client">Client</SelectItem>
                   </SelectContent>
                 </Select>

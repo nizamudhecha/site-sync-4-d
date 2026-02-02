@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import apiClient from "../../utils/api";
+
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -27,15 +28,13 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 
+import { Progress } from "../../components/ui/progress";
+
 import { toast } from "sonner";
 
-import {
-  Plus,
-  MapPin,
-  DollarSign,
-  Calendar,
-  Users as UsersIcon,
-} from "lucide-react";
+import { Plus, MapPin, Calendar, IndianRupee, Trash2 } from "lucide-react";
+
+import { useNavigate } from "react-router-dom";
 
 const AdminProjects = () => {
   const [projects, setProjects] = useState([]);
@@ -48,17 +47,19 @@ const AdminProjects = () => {
   const [selectedProject, setSelectedProject] = useState(null);
   const [selectedEngineers, setSelectedEngineers] = useState([]);
 
-  // ✅ FORM DATA (EMAIL BASED)
+  const navigate = useNavigate();
+
+  // ✅ FULL FORM DATA
   const [formData, setFormData] = useState({
     name: "",
-    client_email: "", // ✅ email instead of client_id
+    client_email: "",
     location: "",
     start_date: "",
     end_date: "",
     budget: "",
   });
 
-  // ✅ Fetch All Data
+  // ✅ Load All Data
   useEffect(() => {
     fetchProjects();
     fetchEngineers();
@@ -68,41 +69,28 @@ const AdminProjects = () => {
   // ✅ Fetch Projects
   const fetchProjects = async () => {
     try {
-      const response = await apiClient.get("/projects");
-      setProjects(response.data);
-    } catch (error) {
-      toast.error("Failed to fetch projects");
+      const res = await apiClient.get("/projects");
+      setProjects(res.data);
+    } catch {
+      toast.error("Failed to fetch projects ❌");
     }
   };
 
-  // ✅ Fetch Engineers
+  // ✅ Engineers
   const fetchEngineers = async () => {
-    try {
-      const response = await apiClient.get("/users?role=Engineer");
-      setEngineers(response.data);
-    } catch (error) {
-      toast.error("Failed to fetch engineers");
-    }
+    const res = await apiClient.get("/users?role=Engineer");
+    setEngineers(res.data);
   };
 
-  // ✅ Fetch Clients
+  // ✅ Clients
   const fetchClients = async () => {
-    try {
-      const response = await apiClient.get("/users?role=Client");
-      setClients(response.data);
-    } catch (error) {
-      toast.error("Failed to fetch clients");
-    }
+    const res = await apiClient.get("/users?role=Client");
+    setClients(res.data);
   };
 
-  // ✅ Submit New Project
+  // ✅ Create Project
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!formData.client_email) {
-      toast.error("Please select a client");
-      return;
-    }
 
     try {
       await apiClient.post("/projects", {
@@ -110,7 +98,8 @@ const AdminProjects = () => {
         budget: parseFloat(formData.budget),
       });
 
-      toast.success("Project created successfully!");
+      toast.success("Project Created ✅");
+
       setOpen(false);
 
       // ✅ Reset Form
@@ -124,77 +113,64 @@ const AdminProjects = () => {
       });
 
       fetchProjects();
-    } catch (error) {
-      toast.error("Failed to create project");
+    } catch {
+      toast.error("Failed to create project ❌");
     }
   };
 
   // ✅ Assign Engineers
   const handleAssignEngineers = async () => {
-    if (!selectedProject || selectedEngineers.length === 0) {
-      toast.error("Select at least one engineer");
-      return;
-    }
+    await apiClient.post(
+      `/projects/${selectedProject.project_id}/assign`,
+      selectedEngineers,
+    );
 
-    try {
-      await apiClient.post(
-        `/projects/${selectedProject.project_id}/assign`,
-        selectedEngineers,
-      );
-
-      toast.success("Engineers assigned successfully!");
-      setAssignOpen(false);
-      setSelectedEngineers([]);
-
-      fetchProjects();
-    } catch (error) {
-      toast.error("Failed to assign engineers");
-    }
+    toast.success("Engineers Assigned ✅");
+    setAssignOpen(false);
+    fetchProjects();
   };
 
-  // ✅ Toggle Engineer Checkbox
-  const toggleEngineerSelection = (engineerId) => {
+  // ✅ Toggle Engineer
+  const toggleEngineerSelection = (id) => {
     setSelectedEngineers((prev) =>
-      prev.includes(engineerId)
-        ? prev.filter((id) => id !== engineerId)
-        : [...prev, engineerId],
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   };
 
-  // ✅ Update Status
-  const updateProjectStatus = async (projectId, status) => {
-    try {
-      await apiClient.put(`/projects/${projectId}`, { status });
-      toast.success("Status updated");
-      fetchProjects();
-    } catch (error) {
-      toast.error("Failed to update status");
-    }
+  // ✅ Delete Project
+  const handleDeleteProject = async (projectId) => {
+    if (!window.confirm("Delete this project? ❌")) return;
+
+    await apiClient.delete(`/projects/${projectId}`);
+    toast.success("Project Deleted ✅");
+    fetchProjects();
   };
 
   return (
     <div className="space-y-6">
-      {/* HEADER */}
+      {/* ✅ Header */}
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">All Projects</h2>
+        <h2 className="text-2xl font-bold uppercase tracking-tight">
+          All Projects
+        </h2>
 
-        {/* CREATE PROJECT DIALOG */}
+        {/* ✅ Create Project Modal */}
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-black text-white">
+            <Button className="bg-slate-900 text-white">
               <Plus className="w-4 h-4 mr-2" />
               Create Project
             </Button>
           </DialogTrigger>
 
+          {/* ✅ Modal Content */}
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Create New Project</DialogTitle>
             </DialogHeader>
 
-            {/* FORM */}
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Project Name */}
+              {/* ✅ Project Name */}
               <div>
                 <Label>Project Name</Label>
                 <Input
@@ -206,30 +182,29 @@ const AdminProjects = () => {
                 />
               </div>
 
-              {/* ✅ Client Dropdown (EMAIL) */}
+              {/* ✅ Client */}
               <div>
                 <Label>Select Client</Label>
-
                 <Select
                   value={formData.client_email}
                   onValueChange={(value) =>
                     setFormData({ ...formData, client_email: value })
                   }>
                   <SelectTrigger>
-                    <SelectValue placeholder="Choose client email" />
+                    <SelectValue placeholder="Choose Client" />
                   </SelectTrigger>
 
                   <SelectContent>
-                    {clients.map((client) => (
-                      <SelectItem key={client.user_id} value={client.email}>
-                        {client.name} ({client.email})
+                    {clients.map((c) => (
+                      <SelectItem key={c.user_id} value={c.email}>
+                        {c.name} ({c.email})
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* Location */}
+              {/* ✅ Location */}
               <div>
                 <Label>Location</Label>
                 <Input
@@ -241,7 +216,7 @@ const AdminProjects = () => {
                 />
               </div>
 
-              {/* Dates */}
+              {/* ✅ Dates */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Start Date</Label>
@@ -268,9 +243,9 @@ const AdminProjects = () => {
                 </div>
               </div>
 
-              {/* Budget */}
+              {/* ✅ Budget */}
               <div>
-                <Label>Budget</Label>
+                <Label>Budget (₹)</Label>
                 <Input
                   type="number"
                   required
@@ -281,77 +256,105 @@ const AdminProjects = () => {
                 />
               </div>
 
+              {/* ✅ Submit */}
               <Button type="submit" className="w-full bg-black text-white">
-                Create Project
+                Create Project ✅
               </Button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      {/* PROJECT LIST */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      {/* ✅ Project Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {projects.map((project) => (
-          <Card key={project.project_id}>
+          <Card key={project.project_id} className="relative">
+            {/* ✅ Delete */}
+            <button
+              onClick={() => handleDeleteProject(project.project_id)}
+              className="absolute top-3 right-3 text-red-600">
+              <Trash2 className="w-5 h-5" />
+            </button>
+
+            {/* ✅ Header */}
             <CardHeader>
               <CardTitle>{project.name}</CardTitle>
 
-              {/* Status */}
-              <Select
-                value={project.status}
-                onValueChange={(value) =>
-                  updateProjectStatus(project.project_id, value)
-                }>
-                <SelectTrigger className="w-32 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
+              {/* ✅ Progress */}
+              <div className="mt-2">
+                <div className="flex justify-between text-xs mb-1">
+                  <span>Progress</span>
+                  <span className="font-bold text-orange-600">
+                    {project.progress || 0}%
+                  </span>
+                </div>
 
-                <SelectContent>
-                  <SelectItem value="Planning">Planning</SelectItem>
-                  <SelectItem value="In Progress">In Progress</SelectItem>
-                  <SelectItem value="Completed">Completed</SelectItem>
-                </SelectContent>
-              </Select>
+                <Progress value={project.progress || 0} className="h-2" />
+              </div>
+
+              <p className="text-sm mt-2 text-slate-600">
+                Client:{" "}
+                <span className="font-semibold text-orange-600">
+                  {project.client_name}
+                </span>
+              </p>
             </CardHeader>
 
-            <CardContent className="space-y-2 text-sm">
-              <p className="flex items-center">
-                <UsersIcon className="w-4 h-4 mr-2" />
-                Client: {project.client_name}
-              </p>
-
-              <p className="flex items-center">
+            {/* ✅ Content */}
+            <CardContent className="space-y-3">
+              <div className="flex items-center text-sm">
                 <MapPin className="w-4 h-4 mr-2" />
                 {project.location}
-              </p>
+              </div>
 
-              <p className="flex items-center">
+              <div className="flex items-center text-sm">
                 <Calendar className="w-4 h-4 mr-2" />
                 {project.start_date} → {project.end_date}
-              </p>
+              </div>
 
-              <p className="flex items-center">
-                <span className="text-lg font-bold mr-2">₹</span>₹
-                {project.budget.toLocaleString()}
-              </p>
+              <div className="flex items-center text-sm">
+                <IndianRupee className="w-4 h-4 mr-2" />₹{" "}
+                {project.budget?.toLocaleString()}
+              </div>
 
-              {/* Assign Engineers */}
-              <Button
-                size="sm"
-                className="w-full mt-2"
-                onClick={() => {
-                  setSelectedProject(project);
-                  setSelectedEngineers(project.assigned_engineers);
-                  setAssignOpen(true);
-                }}>
-                Manage Engineers
-              </Button>
+              {/* ✅ Buttons */}
+              <div className="grid grid-cols-2 gap-2 pt-3 border-t">
+                <Button
+                  onClick={() => {
+                    setSelectedProject(project);
+                    setSelectedEngineers(project.assigned_engineers);
+                    setAssignOpen(true);
+                  }}>
+                  Engineers
+                </Button>
+
+                <Button
+                  onClick={() =>
+                    navigate(`/admin/schedule/${project.project_id}`)
+                  }>
+                  Schedule
+                </Button>
+
+                <Button
+                  onClick={() =>
+                    navigate(`/admin/drawings/${project.project_id}`)
+                  }>
+                  Drawings
+                </Button>
+
+                <Button
+                  onClick={() =>
+                    navigate(`/admin/materials/${project.project_id}`)
+                  }>
+                  Materials
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* ASSIGN ENGINEERS DIALOG */}
+      {/* ✅ Assign Engineers Modal */}
       <Dialog open={assignOpen} onOpenChange={setAssignOpen}>
         <DialogContent>
           <DialogHeader>
@@ -360,23 +363,19 @@ const AdminProjects = () => {
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-3 max-h-72 overflow-y-auto">
-            {engineers.map((engineer) => (
-              <div key={engineer.user_id} className="flex gap-2 items-center">
-                <input
-                  type="checkbox"
-                  checked={selectedEngineers.includes(engineer.user_id)}
-                  onChange={() => toggleEngineerSelection(engineer.user_id)}
-                />
-                <span>
-                  {engineer.name} ({engineer.email})
-                </span>
-              </div>
-            ))}
-          </div>
+          {engineers.map((eng) => (
+            <div key={eng.user_id} className="flex gap-2 items-center">
+              <input
+                type="checkbox"
+                checked={selectedEngineers.includes(eng.user_id)}
+                onChange={() => toggleEngineerSelection(eng.user_id)}
+              />
+              {eng.name}
+            </div>
+          ))}
 
           <Button onClick={handleAssignEngineers} className="w-full bg-black">
-            Confirm Assign
+            Confirm Assign ✅
           </Button>
         </DialogContent>
       </Dialog>
